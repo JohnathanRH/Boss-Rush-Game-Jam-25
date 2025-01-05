@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://iv14mygkehfp"]
+
+[ext_resource type="Texture2D" uid="uid://42a5dvdm1sjm" path="res://arm placeholder.png" id="1_i0ym7"]
+
+[sub_resource type="GDScript" id="GDScript_q4pvn"]
+script/source = "extends Sprite2D
+
+func _process(delta: float) -> void:
+	look_at(get_global_mouse_position())
+"
+
+[node name="armtest" type="Sprite2D"]
+position = Vector2(180, 63)
+texture = ExtResource("1_i0ym7")
+offset = Vector2(47, 45)
+script = SubResource("GDScript_q4pvn")

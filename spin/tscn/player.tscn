@@ -1,0 +1,118 @@
+[gd_scene load_steps=11 format=3 uid="uid://0dtxqoytg0r7"]
+
+[ext_resource type="Texture2D" uid="uid://dllwvhhknfipu" path="res://good dagger straight.png" id="1_leyt2"]
+[ext_resource type="Texture2D" uid="uid://bj2114s85mlxf" path="res://arm placeholder - Copy.png" id="2_h0km1"]
+
+[sub_resource type="GDScript" id="GDScript_je7ld"]
+script/source = "extends CharacterBody2D
+
+@export var mult : float
+"
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_wxms7"]
+
+[sub_resource type="GDScript" id="GDScript_glkjn"]
+script/source = "extends Sprite2D
+
+@export var arm : Sprite2D
+@export var debug : Sprite2D
+@export var player : CharacterBody2D
+@onready var prevPos : Vector2
+
+func _physics_process(delta: float) -> void:
+	var mpos = get_global_mouse_position()
+	var radius = 50
+	var theta = atan2(mpos.y,mpos.x)
+	position = Vector2(arm.position.x+radius*cos(theta), arm.position.y+radius*sin(theta))
+	rotation = atan2(mpos.y,mpos.x)
+	var length = position-prevPos
+	player.mult = abs((length.x+length.y)/40)
+	print(player.mult)
+
+func _on_velocity_sim_timeout() -> void:
+	prevPos = position
+	debug.position = prevPos
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mks8s"]
+size = Vector2(67, 20)
+
+[sub_resource type="GDScript" id="GDScript_pmd5a"]
+script/source = "extends Sprite2D
+
+#@export var arm : Node2D
+
+func _physics_process(delta: float) -> void:
+	var mpos = get_global_mouse_position()
+	rotation = atan2(mpos.y,mpos.x)
+	
+"
+
+[sub_resource type="GDScript" id="GDScript_rcyof"]
+script/source = "extends Line2D
+
+func _process(delta: float) -> void:
+	var mpos = get_local_mouse_position()
+	set_point_position(1,mpos)
+	#print(mpos)
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vyjs5"]
+size = Vector2(82, 86)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_kpbnw"]
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+script = SubResource("GDScript_je7ld")
+
+[node name="Sprites" type="Node2D" parent="."]
+
+[node name="Player" type="Sprite2D" parent="Sprites"]
+position = Vector2(22.5, -46.25)
+scale = Vector2(80.952, 87)
+texture = SubResource("PlaceholderTexture2D_wxms7")
+
+[node name="OnHand" type="Sprite2D" parent="Sprites" node_paths=PackedStringArray("arm", "debug", "player")]
+position = Vector2(70, -44)
+texture = ExtResource("1_leyt2")
+offset = Vector2(44, 2)
+script = SubResource("GDScript_glkjn")
+arm = NodePath("../ArmPlaceholder")
+debug = NodePath("../../debug")
+player = NodePath("../..")
+
+[node name="hitrange" type="Area2D" parent="Sprites/OnHand"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprites/OnHand/hitrange"]
+position = Vector2(53.5, 0)
+shape = SubResource("RectangleShape2D_mks8s")
+
+[node name="velocitySim" type="Timer" parent="Sprites/OnHand"]
+wait_time = 0.06
+autostart = true
+
+[node name="ArmPlaceholder" type="Sprite2D" parent="Sprites"]
+position = Vector2(21, -44)
+texture = ExtResource("2_h0km1")
+offset = Vector2(13, 0)
+script = SubResource("GDScript_pmd5a")
+
+[node name="Line2D" type="Line2D" parent="Sprites/ArmPlaceholder"]
+visible = false
+position = Vector2(-26, 42)
+points = PackedVector2Array(23, -42, 427, -112)
+script = SubResource("GDScript_rcyof")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2(22, -46)
+shape = SubResource("RectangleShape2D_vyjs5")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="debug" type="Sprite2D" parent="."]
+position = Vector2(174, -122)
+scale = Vector2(30.75, 21.5)
+texture = SubResource("PlaceholderTexture2D_kpbnw")
+
+[connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/OnHand" method="_on_velocity_sim_timeout"]
