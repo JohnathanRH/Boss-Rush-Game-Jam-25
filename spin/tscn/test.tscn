@@ -9,5 +9,4 @@
 
 [node name="opsPlaceholder" parent="." node_paths=PackedStringArray("player") instance=ExtResource("2_1kxbx")]
 position = Vector2(149, -42)
-health = 100
 player = NodePath("../CharacterBody2D")

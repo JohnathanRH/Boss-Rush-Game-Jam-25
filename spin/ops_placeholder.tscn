@@ -3,7 +3,7 @@
 [sub_resource type="GDScript" id="GDScript_rddfr"]
 script/source = "extends CharacterBody2D
 
-@export var health : int
+@export var health : float
 @export var player : CharacterBody2D
 func _process(delta: float) -> void:
 	if health <= 0:
@@ -12,8 +12,10 @@ func _process(delta: float) -> void:
 
 func _on_area_2d_area_entered(area: Area2D) -> void:
 	if area.name == \"hitrange\":
-		health -= 10 * player.mult
+		var dam = player.baseDam * player.mult
+		health -= dam
 		$Label.text = \"Hp: \"+str(health)
+		$Label2.text = \"Dmg Done: \"+str(dam)
 "
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_jfu28"]
@@ -27,6 +29,7 @@ size = Vector2(23, 24)
 [node name="opsPlaceholder" type="CharacterBody2D"]
 scale = Vector2(2.60039, 2.49039)
 script = SubResource("GDScript_rddfr")
+health = 100.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(0.5, -2.5)
@@ -50,5 +53,12 @@ offset_top = -48.5868
 offset_right = 20.3876
 offset_bottom = -25.5868
 text = "Hp:"
+
+[node name="Label2" type="Label" parent="."]
+offset_left = -94.6012
+offset_top = 16.0617
+offset_right = -4.6012
+offset_bottom = 39.0617
+text = "Dmg Done: "
 
 [connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]
