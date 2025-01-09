@@ -45,16 +45,14 @@ script/source = "extends Sprite2D
 var direction = 0
 var theta = 0
 var prev_theta = 0
+var run_rotate = false
 
 func _physics_process(delta: float) -> void:
-	var mpos = get_global_mouse_position()
-	if Input.is_action_pressed(\"dbg_downward\"):
+	if run_rotate:
 		direction = clamp(direction+slide, -1, 1)
-	elif Input.is_action_pressed(\"dbg_upward\"):
-		direction = clamp(direction-slide, -1, 1)
 	if (Input.is_action_just_pressed(\"dbg_downward\") or Input.is_action_just_pressed(\"dbg_upward\")) and angular_velocity <= 0.1:
 		angular_velocity = 0.1
-	if Input.is_action_pressed(\"dbg_downward\") or Input.is_action_pressed(\"dbg_upward\"):
+	if run_rotate or Input.is_action_pressed(\"dbg_downward\") or Input.is_action_pressed(\"dbg_upward\"):
 		angular_velocity = clamp(angular_velocity*acceleration, 0, max_speed)
 	else:
 		angular_velocity = clamp(angular_velocity*deceleration, 0, max_speed)
@@ -62,13 +60,20 @@ func _physics_process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			print(\"velocity -\")
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			print(\"velocity +\")
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP and $scrollDelay.is_stopped():
+			slide *= -1
+			run_rotate = true
+			$scrollDelay.start()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and $scrollDelay.is_stopped():
+			slide = absf(slide)
+			run_rotate = true
+			$scrollDelay.start()
 
 func _on_velocity_sim_timeout() -> void:
 	prev_theta = rotation
+
+func _on_scroll_delay_timeout() -> void:
+	run_rotate = false
 "
 
 [sub_resource type="GDScript" id="GDScript_rcyof"]
@@ -115,8 +120,6 @@ shape = SubResource("RectangleShape2D_mks8s")
 wait_time = 0.06
 autostart = true
 
-[node name="scrollDelay" type="Timer" parent="Sprites/OnHand"]
-
 [node name="ArmPlaceholder" type="Sprite2D" parent="Sprites"]
 position = Vector2(21, -44)
 texture = ExtResource("2_h0km1")
@@ -133,6 +136,10 @@ position = Vector2(-26, 42)
 points = PackedVector2Array(23, -42, 427, -112)
 script = SubResource("GDScript_rcyof")
 
+[node name="scrollDelay" type="Timer" parent="Sprites/ArmPlaceholder"]
+wait_time = 0.5
+one_shot = true
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
 position = Vector2(22, -46)
@@ -148,3 +155,4 @@ texture = SubResource("PlaceholderTexture2D_kpbnw")
 
 [connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/OnHand" method="_on_velocity_sim_timeout"]
 [connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/ArmPlaceholder" method="_on_velocity_sim_timeout"]
+[connection signal="timeout" from="Sprites/ArmPlaceholder/scrollDelay" to="Sprites/ArmPlaceholder" method="_on_scroll_delay_timeout"]
