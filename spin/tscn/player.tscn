@@ -18,10 +18,12 @@ script/source = "extends Sprite2D
 @export var arm : Sprite2D
 @export var debug : Sprite2D
 @export var player : CharacterBody2D
+@export var radius := 50.0
 @onready var prevPos : Vector2
 
 func _physics_process(delta: float) -> void:
-	pass
+	position = Vector2(arm.position.x+radius*cos(arm.rotation), arm.position.y+radius*sin(arm.rotation))
+	rotation = arm.rotation
 
 func _on_velocity_sim_timeout() -> void:
 	prevPos = position
@@ -48,10 +50,8 @@ func _physics_process(delta: float) -> void:
 	var mpos = get_global_mouse_position()
 	if Input.is_action_pressed(\"dbg_downward\"):
 		direction = clamp(direction+slide, -1, 1)
-		print(direction)
 	elif Input.is_action_pressed(\"dbg_upward\"):
 		direction = clamp(direction-slide, -1, 1)
-		print(direction)
 	if (Input.is_action_just_pressed(\"dbg_downward\") or Input.is_action_just_pressed(\"dbg_upward\")) and angular_velocity <= 0.1:
 		angular_velocity = 0.1
 	if Input.is_action_pressed(\"dbg_downward\") or Input.is_action_pressed(\"dbg_upward\"):
@@ -61,12 +61,11 @@ func _physics_process(delta: float) -> void:
 	rotation += (angular_velocity*delta) * direction
 
 func _unhandled_input(event: InputEvent) -> void:
-	pass
-	#if event is InputEventMouseButton:
-		#if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			#print(\"velocity -\")
-		#elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			#print(\"velocity +\")
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			print(\"velocity -\")
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			print(\"velocity +\")
 
 func _on_velocity_sim_timeout() -> void:
 	prev_theta = rotation
@@ -116,6 +115,8 @@ shape = SubResource("RectangleShape2D_mks8s")
 wait_time = 0.06
 autostart = true
 
+[node name="scrollDelay" type="Timer" parent="Sprites/OnHand"]
+
 [node name="ArmPlaceholder" type="Sprite2D" parent="Sprites"]
 position = Vector2(21, -44)
 texture = ExtResource("2_h0km1")
@@ -140,6 +141,7 @@ shape = SubResource("RectangleShape2D_vyjs5")
 [node name="Camera2D" type="Camera2D" parent="."]
 
 [node name="debug" type="Sprite2D" parent="."]
+visible = false
 position = Vector2(174, -122)
 scale = Vector2(30.75, 21.5)
 texture = SubResource("PlaceholderTexture2D_kpbnw")
