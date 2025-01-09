@@ -8,9 +8,6 @@ script/source = "extends CharacterBody2D
 
 @export var mult : float
 @export var baseDam := 5.0
-
-func _process(delta: float) -> void:
-	print(get_process_delta_time())
 "
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_wxms7"]
@@ -24,14 +21,7 @@ script/source = "extends Sprite2D
 @onready var prevPos : Vector2
 
 func _physics_process(delta: float) -> void:
-	var mpos = get_global_mouse_position()
-	var radius = 50
-	var theta = atan2(mpos.y,mpos.x)
-	position = Vector2(arm.position.x+radius*cos(theta), arm.position.y+radius*sin(theta))
-	rotation = atan2(mpos.y,mpos.x)
-	var length = position-prevPos
-	player.mult = abs((length.x+length.y)/40)
-	#print(player.mult)
+	pass
 
 func _on_velocity_sim_timeout() -> void:
 	prevPos = position
@@ -45,11 +35,41 @@ size = Vector2(67, 20)
 script/source = "extends Sprite2D
 
 #@export var arm : Node2D
+@export var angular_velocity : float = TAU * 2
+@export var max_speed := 2.0
+@export var deceleration := 0.8
+@export var acceleration := 1.01
+@export var slide := 0.08
+var direction = 0
+var theta = 0
+var prev_theta = 0
 
 func _physics_process(delta: float) -> void:
 	var mpos = get_global_mouse_position()
-	rotation = atan2(mpos.y,mpos.x)
-	
+	if Input.is_action_pressed(\"dbg_downward\"):
+		direction = clamp(direction+slide, -1, 1)
+		print(direction)
+	elif Input.is_action_pressed(\"dbg_upward\"):
+		direction = clamp(direction-slide, -1, 1)
+		print(direction)
+	if (Input.is_action_just_pressed(\"dbg_downward\") or Input.is_action_just_pressed(\"dbg_upward\")) and angular_velocity <= 0.1:
+		angular_velocity = 0.1
+	if Input.is_action_pressed(\"dbg_downward\") or Input.is_action_pressed(\"dbg_upward\"):
+		angular_velocity = clamp(angular_velocity*acceleration, 0, max_speed)
+	else:
+		angular_velocity = clamp(angular_velocity*deceleration, 0, max_speed)
+	rotation += (angular_velocity*delta) * direction
+
+func _unhandled_input(event: InputEvent) -> void:
+	pass
+	#if event is InputEventMouseButton:
+		#if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			#print(\"velocity -\")
+		#elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			#print(\"velocity +\")
+
+func _on_velocity_sim_timeout() -> void:
+	prev_theta = rotation
 "
 
 [sub_resource type="GDScript" id="GDScript_rcyof"]
@@ -67,6 +87,7 @@ size = Vector2(82, 86)
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_kpbnw"]
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
+slide_on_ceiling = false
 script = SubResource("GDScript_je7ld")
 
 [node name="Sprites" type="Node2D" parent="."]
@@ -100,6 +121,10 @@ position = Vector2(21, -44)
 texture = ExtResource("2_h0km1")
 offset = Vector2(13, 0)
 script = SubResource("GDScript_pmd5a")
+angular_velocity = 10.0
+max_speed = 16.0
+deceleration = 0.9
+acceleration = 1.102
 
 [node name="Line2D" type="Line2D" parent="Sprites/ArmPlaceholder"]
 visible = false
@@ -120,3 +145,4 @@ scale = Vector2(30.75, 21.5)
 texture = SubResource("PlaceholderTexture2D_kpbnw")
 
 [connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/OnHand" method="_on_velocity_sim_timeout"]
+[connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/ArmPlaceholder" method="_on_velocity_sim_timeout"]
