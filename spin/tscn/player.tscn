@@ -61,10 +61,12 @@ func _physics_process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and $scrollDelay.is_stopped():
-			slide *= -1
+			print(\"ass\")
+			slide = -(absf(slide))
 			run_rotate = true
 			$scrollDelay.start()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and $scrollDelay.is_stopped():
+			print(\"prick\")
 			slide = absf(slide)
 			run_rotate = true
 			$scrollDelay.start()
@@ -137,7 +139,7 @@ points = PackedVector2Array(23, -42, 427, -112)
 script = SubResource("GDScript_rcyof")
 
 [node name="scrollDelay" type="Timer" parent="Sprites/ArmPlaceholder"]
-wait_time = 0.5
+wait_time = 0.3
 one_shot = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
