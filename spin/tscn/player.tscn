@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://0dtxqoytg0r7"]
+[gd_scene load_steps=13 format=3 uid="uid://0dtxqoytg0r7"]
 
 [ext_resource type="Texture2D" uid="uid://dllwvhhknfipu" path="res://good dagger straight.png" id="1_leyt2"]
 [ext_resource type="Texture2D" uid="uid://bj2114s85mlxf" path="res://arm placeholder - Copy.png" id="2_h0km1"]
@@ -46,6 +46,8 @@ var direction = 0
 var theta = 0
 var prev_theta = 0
 var run_rotate = false
+@onready var prev_direction = sign(direction)
+@export var spin_sensor : Node2D
 
 func _physics_process(delta: float) -> void:
 	if run_rotate:
@@ -57,25 +59,33 @@ func _physics_process(delta: float) -> void:
 	else:
 		angular_velocity = clamp(angular_velocity*deceleration, 0, max_speed)
 	rotation += (angular_velocity*delta) * direction
+	spin_detect()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP and $scrollDelay.is_stopped():
-			print(\"ass\")
-			slide = -(absf(slide))
-			run_rotate = true
-			$scrollDelay.start()
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and $scrollDelay.is_stopped():
-			print(\"prick\")
-			slide = absf(slide)
-			run_rotate = true
-			$scrollDelay.start()
+	change_direction(event)
 
 func _on_velocity_sim_timeout() -> void:
 	prev_theta = rotation
 
 func _on_scroll_delay_timeout() -> void:
 	run_rotate = false
+
+func change_direction(event:InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP and $scrollDelay.is_stopped():
+			slide = -(absf(slide))
+			run_rotate = true
+			$scrollDelay.start()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and $scrollDelay.is_stopped():
+			slide = absf(slide)
+			run_rotate = true
+			$scrollDelay.start()
+
+func spin_detect() -> void:
+	# On blade stop, or direction changed, then reposition the sensors.
+	if round(angular_velocity) == 0 or (sign(direction) != prev_direction):
+		spin_sensor.rotation = rotation
+		prev_direction = sign(direction)
 "
 
 [sub_resource type="GDScript" id="GDScript_rcyof"]
@@ -92,11 +102,37 @@ size = Vector2(82, 86)
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_kpbnw"]
 
+[sub_resource type="GDScript" id="GDScript_3ad1a"]
+resource_name = "spin_sensor"
+script/source = "extends Node2D
+
+var sen1_active := false
+var sen2_active := false
+var sen3_active := false
+
+func _physics_process(delta: float) -> void:
+	if sen1_active and sen2_active and sen3_active:
+		print(\"ability activated\")
+
+func sen1_entered(area: Area2D) -> void:
+	if area.name == \"hitrange\":
+		sen1_active = true
+func sen2_entered(area: Area2D) -> void:
+	if area.name == \"hitrange\":
+		sen2_active = true
+func sen3_entered(area: Area2D) -> void:
+	if area.name == \"hitrange\":
+		sen3_active = true
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hdiua"]
+
 [node name="CharacterBody2D" type="CharacterBody2D"]
 slide_on_ceiling = false
 script = SubResource("GDScript_je7ld")
 
 [node name="Sprites" type="Node2D" parent="."]
+position = Vector2(-22, 45)
 
 [node name="Player" type="Sprite2D" parent="Sprites"]
 position = Vector2(22.5, -46.25)
@@ -122,7 +158,7 @@ shape = SubResource("RectangleShape2D_mks8s")
 wait_time = 0.06
 autostart = true
 
-[node name="ArmPlaceholder" type="Sprite2D" parent="Sprites"]
+[node name="ArmPlaceholder" type="Sprite2D" parent="Sprites" node_paths=PackedStringArray("spin_sensor")]
 position = Vector2(21, -44)
 texture = ExtResource("2_h0km1")
 offset = Vector2(13, 0)
@@ -131,6 +167,7 @@ angular_velocity = 10.0
 max_speed = 16.0
 deceleration = 0.9
 acceleration = 1.102
+spin_sensor = NodePath("../../spin_sensors")
 
 [node name="Line2D" type="Line2D" parent="Sprites/ArmPlaceholder"]
 visible = false
@@ -155,6 +192,30 @@ position = Vector2(174, -122)
 scale = Vector2(30.75, 21.5)
 texture = SubResource("PlaceholderTexture2D_kpbnw")
 
+[node name="spin_sensors" type="Node2D" parent="."]
+script = SubResource("GDScript_3ad1a")
+
+[node name="sen1" type="Area2D" parent="spin_sensors"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="spin_sensors/sen1"]
+position = Vector2(0, -90)
+shape = SubResource("CircleShape2D_hdiua")
+
+[node name="sen2" type="Area2D" parent="spin_sensors"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="spin_sensors/sen2"]
+position = Vector2(0, 90)
+shape = SubResource("CircleShape2D_hdiua")
+
+[node name="sen3" type="Area2D" parent="spin_sensors"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="spin_sensors/sen3"]
+position = Vector2(-90, 0)
+shape = SubResource("CircleShape2D_hdiua")
+
 [connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/OnHand" method="_on_velocity_sim_timeout"]
 [connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/ArmPlaceholder" method="_on_velocity_sim_timeout"]
 [connection signal="timeout" from="Sprites/ArmPlaceholder/scrollDelay" to="Sprites/ArmPlaceholder" method="_on_scroll_delay_timeout"]
+[connection signal="area_entered" from="spin_sensors/sen1" to="spin_sensors" method="sen1_entered"]
+[connection signal="area_entered" from="spin_sensors/sen2" to="spin_sensors" method="sen2_entered"]
+[connection signal="area_entered" from="spin_sensors/sen3" to="spin_sensors" method="sen3_entered"]
