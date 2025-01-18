@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://b154dp67meeud"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6ja10"]
+size = Vector2(482, 274)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_qjyro"]
+
+[node name="slug_boss" type="CharacterBody2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(231, -153)
+shape = SubResource("RectangleShape2D_6ja10")
+
+[node name="Sprites" type="Node2D" parent="."]
+
+[node name="torso" type="Sprite2D" parent="Sprites"]
+position = Vector2(247.25, -74.25)
+scale = Vector2(495.5, 149.5)
+texture = SubResource("PlaceholderTexture2D_qjyro")
+
+[node name="shell" type="Sprite2D" parent="Sprites"]
+position = Vector2(373.5, -205.5)
+scale = Vector2(243, 179)
+texture = SubResource("PlaceholderTexture2D_qjyro")

@@ -8,6 +8,18 @@ script/source = "extends CharacterBody2D
 
 @export var mult : float
 @export var baseDam := 5.0
+@export var SPEED := 500.0
+var direction : Vector2
+
+func _physics_process(delta: float) -> void:
+	print(direction)
+	velocity = direction * SPEED
+	move_and_slide()
+	print(velocity)
+
+func _unhandled_input(event: InputEvent) -> void:
+	direction.x = Input.get_axis(\"west\", \"east\")
+	direction.y = Input.get_axis(\"north\", \"south\")
 "
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_wxms7"]
@@ -180,11 +192,10 @@ wait_time = 0.3
 one_shot = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
-position = Vector2(22, -46)
 shape = SubResource("RectangleShape2D_vyjs5")
 
 [node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(0.435, 0.435)
 
 [node name="debug" type="Sprite2D" parent="."]
 visible = false
