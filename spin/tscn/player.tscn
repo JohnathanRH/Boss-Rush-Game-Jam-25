@@ -12,10 +12,8 @@ script/source = "extends CharacterBody2D
 var direction : Vector2
 
 func _physics_process(delta: float) -> void:
-	print(direction)
 	velocity = direction * SPEED
 	move_and_slide()
-	print(velocity)
 
 func _unhandled_input(event: InputEvent) -> void:
 	direction.x = Input.get_axis(\"west\", \"east\")
@@ -139,7 +137,9 @@ func sen3_entered(area: Area2D) -> void:
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hdiua"]
 
-[node name="CharacterBody2D" type="CharacterBody2D"]
+[node name="player" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 3
 slide_on_ceiling = false
 script = SubResource("GDScript_je7ld")
 

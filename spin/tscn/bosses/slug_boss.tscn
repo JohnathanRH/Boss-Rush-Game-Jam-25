@@ -1,24 +1,34 @@
-[gd_scene load_steps=3 format=3 uid="uid://b154dp67meeud"]
+[gd_scene load_steps=5 format=3 uid="uid://b154dp67meeud"]
+
+[ext_resource type="Script" path="res://tscn/bosses/slug_boss.gd" id="1_xl808"]
+[ext_resource type="PackedScene" uid="uid://53pipeymrjj4" path="res://tscn/components/boss_nav.tscn" id="2_e1y7k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6ja10"]
-size = Vector2(482, 274)
+size = Vector2(194, 117)
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_qjyro"]
 
 [node name="slug_boss" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_xl808")
+SPEED = 100.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(231, -153)
+position = Vector2(37, 78.5)
 shape = SubResource("RectangleShape2D_6ja10")
 
 [node name="Sprites" type="Node2D" parent="."]
 
 [node name="torso" type="Sprite2D" parent="Sprites"]
-position = Vector2(247.25, -74.25)
+position = Vector2(0, 63)
 scale = Vector2(495.5, 149.5)
 texture = SubResource("PlaceholderTexture2D_qjyro")
 
 [node name="shell" type="Sprite2D" parent="Sprites"]
-position = Vector2(373.5, -205.5)
+position = Vector2(105, -95)
 scale = Vector2(243, 179)
 texture = SubResource("PlaceholderTexture2D_qjyro")
+
+[node name="boss_nav" parent="." instance=ExtResource("2_e1y7k")]
+radius = 30.0
