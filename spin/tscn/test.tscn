@@ -4,9 +4,9 @@
 [ext_resource type="PackedScene" uid="uid://0dtxqoytg0r7" path="res://tscn/player.tscn" id="1_o0pqw"]
 [ext_resource type="PackedScene" uid="uid://2xwlfmqvavl1" path="res://tscn/components/ground_data.tscn" id="2_gpkso"]
 [ext_resource type="PackedScene" uid="uid://f3ihms5el0av" path="res://tscn/components/ground_display.tscn" id="3_0a0pj"]
-[ext_resource type="PackedScene" uid="uid://b154dp67meeud" path="res://tscn/bosses/slug_boss.tscn" id="5_lydjc"]
+[ext_resource type="PackedScene" uid="uid://ej6qcd3x0rwp" path="res://tscn/bosses/slug/slug_boss.tscn" id="5_0gv57"]
 
-[node name="Node2D" type="Node2D"]
+[node name="Node2D" type="Node2D" groups=["map"]]
 
 [node name="test_map" parent="." instance=ExtResource("1_8yq68")]
 
@@ -18,6 +18,6 @@ tile_map_data = PackedByteArray("AAD9//3/AQAIAAQAAAD9//7/AQAIAAQAAAD9////AQAIAAQ
 
 [node name="player" parent="." instance=ExtResource("1_o0pqw")]
 
-[node name="slug_boss" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_lydjc")]
-position = Vector2(-80, 436)
+[node name="slug_boss" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_0gv57")]
+position = Vector2(-94, 422)
 player = NodePath("../player")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://0dtxqoytg0r7"]
+[gd_scene load_steps=14 format=3 uid="uid://0dtxqoytg0r7"]
 
 [ext_resource type="Texture2D" uid="uid://dllwvhhknfipu" path="res://good dagger straight.png" id="1_leyt2"]
 [ext_resource type="Texture2D" uid="uid://bj2114s85mlxf" path="res://arm placeholder - Copy.png" id="2_h0km1"]
@@ -9,7 +9,13 @@ script/source = "extends CharacterBody2D
 @export var mult : float
 @export var baseDam := 5.0
 @export var SPEED := 500.0
+@export var hp := 100.0
 var direction : Vector2
+signal damage(amount : int)
+
+func _ready() -> void:
+	$hp_bar.value = hp
+	damage.connect(_damage)
 
 func _physics_process(delta: float) -> void:
 	velocity = direction * SPEED
@@ -18,6 +24,12 @@ func _physics_process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	direction.x = Input.get_axis(\"west\", \"east\")
 	direction.y = Input.get_axis(\"north\", \"south\")
+
+func _damage(amount : int):
+	hp -= amount
+	$hp_bar.value = hp
+	if hp <= 0:
+		visible = false
 "
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_wxms7"]
@@ -137,6 +149,9 @@ func sen3_entered(area: Area2D) -> void:
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hdiua"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tg5b4"]
+size = Vector2(84, 85)
+
 [node name="player" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 3
@@ -223,6 +238,17 @@ shape = SubResource("CircleShape2D_hdiua")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="spin_sensors/sen3"]
 position = Vector2(-90, 0)
 shape = SubResource("CircleShape2D_hdiua")
+
+[node name="player_shape" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="player_shape"]
+shape = SubResource("RectangleShape2D_tg5b4")
+
+[node name="hp_bar" type="ProgressBar" parent="."]
+offset_left = -170.0
+offset_top = -111.0
+offset_right = 160.0
+offset_bottom = -71.0
 
 [connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/OnHand" method="_on_velocity_sim_timeout"]
 [connection signal="timeout" from="Sprites/OnHand/velocitySim" to="Sprites/ArmPlaceholder" method="_on_velocity_sim_timeout"]
